@@ -6,6 +6,7 @@ from collections import defaultdict
 from scipy.spatial.distance import pdist, squareform
 import os
 
+#------------------------------------------------------------------------------------
 #function 
 def convert_to_cartesian(phi_R_z):
     """
@@ -26,6 +27,8 @@ def convert_to_cartesian(phi_R_z):
     
     return np.column_stack((x, y, z))
 
+
+#===================================================================================
 # which action component, 0 is radial, 1 is azimuthal and 2 is vertical action
 which_j = 0
 # CHANGE PATH HERE
@@ -41,18 +44,16 @@ delta_t_range = np.arange(1, 457, 1)
 n_bins = len(birth_bins)-1
 
 print('loading data')
-#load data. CHANGE PATH HERE
-A=np.load('path_to/A.npy')
-J=np.load('path_to/filt_J.npz') #filtered data saved as JR,Jz,Jphi
-C=np.load('path_to/C.npy')   #in cylindrical coordinates
+#GET DATA FROM  https://www.mso.anu.edu.au/~arunima/stellar-actions-I-data/
+#CHANGE PATH HERE if needed
+with h5py.File('stellar-actions-I/data/actions.h5', 'r') as f:
+    J = f['actions'][:] #filtered data saved as JR,Jz,Jphi
+    C = f['coordinates'][:] #in cylindrical coordinates
+    A = f['age'][:]    #STELLAR AGES (MYR)
 
-if which_j==0:
-    filt_J = J['JR']
-elif which_j==1:
-    filt_J = J['Jphi']
-elif which_j==2:
-    filt_J = J['Jz']
 
+    
+#================================================================================
 # Reshape to (T*N, 3) to treat all time+star entries as one list
 C_flat = C.reshape(-1, 3)
 # Apply the vectorised conversion
@@ -81,6 +82,13 @@ for t0 in tqdm(range(C_cart.shape[0]),desc='looping to get pairwise birth distan
             i2 = born_now[triu_inds[1][idx]]
             bin_pair_indices[b].append((t0, i1, i2))        #stores snapshot number and the indices of the pair of star that fall in each birth_bin
 
+if which_j==0:
+    filt_J = J['JR']
+elif which_j==1:
+    filt_J = J['Jphi']
+elif which_j==2:
+    filt_J = J['Jz']
+    
 ##creating hdf5 file
 if not os.path.exists(output_file):
     with h5py.File(output_file, "w") as f:
