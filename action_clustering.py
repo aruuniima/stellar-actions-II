@@ -28,7 +28,7 @@ def convert_to_cartesian(phi_R_z):
 
 # which action component, 0 is radial, 1 is azimuthal and 2 is vertical action
 which_j = 0
-
+# CHANGE PATH HERE
 output_file = 'insert_output_file_path_here.h5'
 logfile = "insert_log_file_path_here.txt"    #to keep track of which timesteps have been done
 
