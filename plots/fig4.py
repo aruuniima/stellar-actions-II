@@ -67,8 +67,7 @@ list_Jphi = read_relchange_by_bin(output_file_phi)
 plt.close('all')
 fig, axs = plt.subplots(3, 1, figsize=(5,11),sharex='all')
 
-#which birth bin are we plotting: stars born within 0.1-0.5 pc of each other
-#CHECK THIS!!!!
+#which birth bin are we plotting: stars born within 0.5-2 pc of each other
 k = 1 
 
 # JR panel -------------------------------------------------------------
