@@ -1,13 +1,46 @@
-import pandas as pd
-import obs_functions as func
+"""
+Compute action differences for observed moving groups and save results to HDF5.
+
+This script:
+- Reads the Hunt & Reffert (2024) moving group catalog
+- Loads cleaned membership data with radial velocities
+- Computes action differences for each group using functions_obs_actions.process_cluster()
+- Saves ΔJR, ΔJz, ΔJphi + age metadata to an HDF5 output file
+- (Optional) Saves summary percentiles to CSV if all_actions=False
+
+Author: Arunima
+Date: 14-11-2025
+"""
+
+#-----------------------------------------------------------------------------------------------------------------------
+#IMPORTS
+#-----------------------------------------------------------------------------------------------------------------------
+
 import os 
 import h5py
 import numpy as np
+import pandas as pd
+import obs_functions as func
+
+ # =============================================================================
+# Configuration
+# =============================================================================
 
 all_actions=True #are we saving the entire distribution of actions (along with age mu and sigma) to a hdf5 file
+#False would just save summary percentiles
 
 #define a function to write out the hdf5 file if all_actions==True:
-stream_h5_file = '/g/data/jh2/ax8338/project2/obs_applications/streams_actions_pruned.hdf5'
+# CHANGE PATH HERE
+stream_h5_file = 'PATH_HERE/streams_actions.hdf5'
+
+clusters_file = 'stellar-actions-II/data/clusters' # CHANGE PATH HERE
+
+mem_file =  'stellar-actions-II/data//all_stars.csv' # CHANGE PATH HERE
+
+# =============================================================================
+# HDF5 Writing Utility
+# =============================================================================
+
 def write_stream_actions(filename,cluster_name, delR, delz,delphi, age_mu, age_sigma):
     """
     Save cluster's actions differences and age info to an HDF5 file.
@@ -21,7 +54,7 @@ def write_stream_actions(filename,cluster_name, delR, delz,delphi, age_mu, age_s
     delR, delz, delphi : array-like
         Arrays of action/coordinate differences.
     age_mu, age_sigma : float
-        Mean and uncertainty (1σ) of cluster age.
+        Mean and uncertainty (1sigma) of cluster age.
     """
     with h5py.File(filename, "a") as f:  # "a" = append if exists
         # Create or overwrite group for this cluster
@@ -41,12 +74,12 @@ def write_stream_actions(filename,cluster_name, delR, delz,delphi, age_mu, age_s
     
 if not os.path.exists(stream_h5_file):
     with h5py.File(stream_h5_file, "w") as f:
-        f.create_group('trial')
+        pass
 
-clusters_file = '/g/data/jh2/ax8338/project2/obs_applications/clusters'
-mem_file =  '/g/data/jh2/ax8338/project2/obs_applications/members'
 
-#reading clusters file from the Hunt and Reffert 2024 catalog
+# =============================================================================
+# Load Cluster Summary (Hunt & Reffert 2024)
+# =============================================================================
 cluster_summary = pd.read_fwf(
     clusters_file,  # replace with your file path
     colspecs=[
@@ -76,50 +109,16 @@ cluster_summary['age_median']= 10**cluster_summary['age_median']/10**6
 cluster_summary['age_16p']= 10**cluster_summary['age_16p']/10**6
 cluster_summary['age_84p']= 10**cluster_summary['age_84p']/10**6
 cluster_summary=cluster_summary[cluster_summary['age_median']<=457] #age should be less than 457 Myr because that's the simulation time we have
-# cluster_summary=cluster_summary[cluster_summary['radius_pc']>=50] #radius should at least be 50 pc otherwise it's basically all in the same area and can be visually identified
 
-# ##reading members data
-# ### members data
-# members = pd.read_fwf(
-#     mem_file,  # replace with your file path
-#     colspecs=[
-#         (0, 20),    # cluster name
-#         (21, 25),   # internal cluster ID
-#         (26, 45),   # Gaia DR3 source ID
-#         (61, 73),   # RA
-#         (85, 96),   # DEC
-#         (108, 120), # Galactic longitude
-#         (121, 132), # Galactic latitude
-#         (133, 144), # PM RA*cos(dec)
-#         (156, 167), # PM Dec
-#         (528, 537), # Radial velocity
-#         (538, 550), # Radial velocity error
-#     ],
-#     names=[
-#         "cluster_name", "internal_id", "source_id", "ra", "dec",
-#         "glon", "glat", "pmra", "pmdec", "radial_velocity", "radial_velocity_error"
-#     ]
-# )
-# # Create a set of valid (cluster_name, internal_id) pairs
-# valid_clusters = set(zip(cluster_summary["cluster_name"], cluster_summary["internal_id"]))
+# =============================================================================
+# Load Member Star Data
+# =============================================================================
 
-# # Filter members that belong to those clusters
-# filtered_members = members[
-#     members.apply(lambda row: (row["cluster_name"], row["internal_id"]) in valid_clusters, axis=1)
-# ]
+full_df = pd.read_csv(mem_file)
 
-# #combined dataframe
-# full_df = pd.merge(
-#     filtered_members,
-#     cluster_summary,
-#     on=["cluster_name", "internal_id"],
-#     how="left"  # keep all member stars
-# )
-
-# full_df = pd.read_csv('/g/data/jh2/ax8338/project2/obs_applications/OCT_all_stars_moreRVs.csv')
-#full df with outliers removed- radial velocities beyond mean+/-3sigma
-full_df = pd.read_csv('/g/data/jh2/ax8338/project2/obs_applications/NOV_all_stars_pruned.csv')
-
+# =============================================================================
+# Process All Clusters
+# =============================================================================
 
 all_clusters_summary = []
 for name in cluster_summary['cluster_name'].unique():
@@ -134,6 +133,11 @@ for name in cluster_summary['cluster_name'].unique():
     except Exception as e:
         print(f"Error processing {name}:{e}")
 
+
+# =============================================================================
+# If requested, save percentile summary table
+# =============================================================================
+
 if all_actions==False:
     columns = [
         'cluster_name',
@@ -145,5 +149,5 @@ if all_actions==False:
     ]
     
     summary_df = pd.DataFrame(all_clusters_summary, columns=columns)
-    
-    summary_df.to_csv('/g/data/jh2/ax8338/project2/obs_applications/final_clusters_result_OCT.csv',index=False)
+    # CHANGE PATH HERE
+    summary_df.to_csv('PATH_HERE/final_clusters_result.csv',index=False)
