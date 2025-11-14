@@ -1,13 +1,30 @@
-import galpy
+"""
+=
+Utilities for selecting cluster/stream members, retrieving Gaia Bailer-Jones
+distances, converting coordinates to J2000, computing orbital actions with galpy,
+and computing pairwise action differences for stellar groups.
+
+Used in the analysis for:
+Arunima et al. Evolution of action-space coherence in a Milky Way-like simulation
+
+Author: Arunima
+Date: 14-11-2025
+"""
+
+# ======================================================================
+# Imports
+# ======================================================================
 import numpy as np
-import matplotlib.pyplot as plt
 import h5py
 import pandas as pd
-from galpy.potential import evaluateR2derivs, evaluatePotentials, evaluatez2derivs
-from galpy.potential import MWPotential2014, evaluateRforces, evaluatezforces, evaluateRzderivs
+
+from astroquery.gaia import Gaia
+from astropy.coordinates import SkyCoord
+from astropy.time import Time
+import astropy.units as u
+
 from galpy.orbit import Orbit
-from galpy.actionAngle import actionAngle
-from astropy import units
+from galpy.potential import MWPotential2014
 from galpy.actionAngle import estimateDeltaStaeckel
 from galpy.actionAngle import actionAngleStaeckel
 
@@ -18,9 +35,8 @@ def select_cluster_members(clusters_df, cluster_name):
     """select members of given cluster from big datframe"""
     return clusters_df[clusters_df['cluster_name'] == cluster_name].copy()
 
-##getting gaia bailer jones distances
+## getting gaia bailer jones distances
 
-from astroquery.gaia import Gaia
 def get_bj_distances(source_ids):
     ids_str = ','.join(str(int(sid)) for sid in source_ids)
     query = f"""
@@ -32,19 +48,29 @@ def get_bj_distances(source_ids):
     res = job.get_results().to_pandas()
     return res
 
-#merging distance data with rest of the cluster data
+# merging distance data with rest of the cluster data
 def merge_dist_dataframe(members_df,bj_df):
+        """Merge BJ distances into cluster dataframe."""
     return pd.merge(members_df,bj_df,on='source_id',how='left')
 
 ##GETTING ACTIONS AND THEIR DIFFERENCES
 
 #change ra and dec of this catalogue to J2000 from J2016
-from astropy.coordinates import SkyCoord
-from astropy.time import Time
-import astropy.units as u
 
 # function to get action change once we have actions from galpy in galpy coordinates
 def action_diff(J):
+        """
+    Compute the 16th/50th/84th percentiles of relative action differences.
+
+    Parameters
+    ----------
+    J : array-like
+        1D array of actions (dimensionless galpy units)
+
+    Returns
+    -------
+    (p16, median, p84)
+    """
     JR=J*8*220 #kpc km/s
     # Compute outer differences and geometric means
     JR_i = JR[:, None]  # shape (N, 1)
@@ -65,6 +91,7 @@ def action_diff(J):
 
 # function to get action change once we have actions from galpy in galpy coordinates - gives all pairs' action differences instead of just percentiles
 def all_action_diff(J):
+        """Return all pairwise relative action differences, flattened."""
     JR=J*8*220 #kpc km/s
     # Compute outer differences and geometric means
     JR_i = JR[:, None]  # shape (N, 1)
@@ -82,22 +109,34 @@ def all_action_diff(J):
     i_inds, j_inds = np.triu_indices(len(JR), k=1)
     rel_diff_upper = rel_diff_matrix[i_inds, j_inds]
     return rel_diff_upper
-    
+
+
+# ======================================================================
+# Main pipeline for computing actions
+# ======================================================================
+
 #writing a function to get the action change to put on the plot given RA, dec, dist,pmra,pmdec,vlos
 
 def action_difference_pipeline(df,j2016=True,all_actions=False):
     """
-    function uses galpy to get actions of all the member stars when a dataframe of the stars is given
-    the dataframe should have following columns:
-    ra,dec,pmra,pmdec,dist_median,radial_velocity
-    if epoch is J2000 instead of J2016, put j2016 as false, it is True by default
-    Distance and radial velocity won't be available for a lot of members.
-    Should have options? can take all missing rad vel and distances as mean of the ones available
-    OR ignore stars that dont have radial velocities, 
-    
-    uses MWPotential2014 and returns 16th, median and 84th percentiles of relative action change 
-    in three components. [[jr16,jr50,jr84],[jphi16,jphi50,jphi84],[jz16,jz50,jz84]]
-    """
+    Compute actions and pairwise action differences for a set of stars.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Must contain: ra, dec, dist_median, pmra, pmdec, best_rv
+    j2016 : bool
+        If True, convert epoch J2016 -> J2000.
+    all_actions : bool
+        If True, return the full flattened action-difference arrays.
+     Returns
+    -------
+    If all_actions=False:
+        [[jr16,jr50,jr84], [jphi16,...], [jz16,...]]
+
+    If all_actions=True:
+        (all_jr_diffs, all_jphi_diffs, all_jz_diffs)
+        """
     ra = np.array(df['ra'])
     dec = np.array(df['dec'])
     dist = np.array(df['dist_median'])
@@ -112,6 +151,9 @@ def action_difference_pipeline(df,j2016=True,all_actions=False):
     pmra=pmra[finite_mask]
     pmdec=pmdec[finite_mask]
     vlos=vlos[finite_mask]
+    # --------------------------
+    # Epoch conversion
+    # --------------------------
     if j2016==True:
         # Example: convert your columns into astropy quantities
         coord_2016 = SkyCoord(
@@ -133,7 +175,9 @@ def action_difference_pipeline(df,j2016=True,all_actions=False):
         pmra = coord_2000.pm_ra_cosdec.to_value(u.mas/u.yr)
         pmdec = coord_2000.pm_dec.to_value(u.mas/u.yr)
         
-
+    # --------------------------
+    # Galpy actions
+    # --------------------------
     o = Orbit(np.array((ra,dec,dist,pmra,pmdec,vlos)).T,radec=True,ro=8,vo=220)
     ts = np.linspace(0., 50, 10000) 
     o.integrate(ts, MWPotential2014)
@@ -147,11 +191,30 @@ def action_difference_pipeline(df,j2016=True,all_actions=False):
         return all_action_diff(jr), all_action_diff(jphi), all_action_diff(jz)
     return [[jr16,jr50,jr84],[jphi16,jphi50,jphi84],[jz16,jz50,jz84]]
 
-#how can i get a cluster dataframe at the end which will have all actions percentiles, age percentiles, cluster name, number of members used for calculation, total number of members in the hunt and reffert catalog
-# full_df['cluster_name','n_members','radius_pc','n_with_rv','age_16p','age_median','age_84p'] + include action percentiles from our calculation
+# ======================================================================
+# Cluster wrapper
+# ======================================================================
 
 def process_cluster(clusters_df,cluster_name,all_actions=False):
-    print('selecting members of cluster')
+     """
+    Full pipeline for a single cluster:
+    - select members
+    - obtain BJ distances
+    - merge
+    - compute action percentiles
+    - compute age/stats summary
+
+    Returns
+    -------
+    If all_actions=False:
+        [cluster_name, jr16,jr50,jr84, jphi16,..., jz16,...,
+         age16, age50, age84, n_total, n_used, radius_pc]
+
+    If all_actions=True:
+        (age50, age_err, action_diff_arrays)
+    """
+
+    print(f"[{cluster_name}] Selecting members...")
     members = select_cluster_members(clusters_df,cluster_name)
     print('getting distances from gaia archive bailer-jones catalogue')
     bj_df = get_bj_distances(members['source_id'].tolist())
