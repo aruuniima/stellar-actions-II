@@ -115,13 +115,15 @@ cluster_summary=cluster_summary[cluster_summary['age_median']<=457] #age should 
 # =============================================================================
 
 full_df = pd.read_csv(mem_file)
-
+full_df=full_df[full_df['n_with_rv']>10]
+full_df=full_df[full_df['age_84p']<456]
+common_names = set(cluster_summary['cluster_name'].unique()).intersection(set(full_df['cluster_name'].unique()))
 # =============================================================================
 # Process All Clusters
 # =============================================================================
 
 all_clusters_summary = []
-for name in cluster_summary['cluster_name'].unique():
+for name in common_names :
     try:
         if all_actions:
             mu,sigma,J = func.process_cluster(full_df,name,all_actions=all_actions)
