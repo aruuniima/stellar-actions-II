@@ -120,10 +120,7 @@ def process_p_post(kde_dir,age,delJz_obs,bias=False):
     high_2s = cdf_interp(0.975)
     return interp,r_grid,dj_grid,post,r_ml,r_median,high_1s,high_2s
 
-def normalise_posterior(L, prior):
-    post = L * prior
-    Z = np.trapz(post, x=np.arange(len(post)))
-    return post / Z if Z > 0 else post
+
 
 #getting L1 norm
 def compute_L1(r_ml, dj_grid_new, kde_obs, interp):
@@ -144,16 +141,6 @@ def compute_L1(r_ml, dj_grid_new, kde_obs, interp):
     L1_full = 0.5 * np.trapezoid(np.abs(p_obs - p_theo), dj_grid_new)
 
     return L1_full
-
-# =========================
-# AGE SAMPLING
-# =========================
-
-def sample_ages(mu, sigma, N=1000):
-    """Sample stellar ages from Gaussian truncated at [0, 399]."""
-    ages = np.random.normal(mu, sigma, N)
-    ages = np.clip(ages, 0, 399)
-    return ages
 
 
 # =========================
