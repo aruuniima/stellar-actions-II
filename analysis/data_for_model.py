@@ -3,8 +3,7 @@ Processes pairwise action evolution for all star pairs computing absolute and re
 The resulting data is used for the inference model in the paper Arunima et al for finding initial sizes of real observed moving groups/stellar streams.
 Gives an HDF5 file as a result. However, the file would be extremely big and is not provided here in this repo
 
-Usage:
-python data_for_model.py --component JR --data-path /path/to/data
+change paths etc in the user configuration block!
 
 Author: Arunima
 Date:19-11-2025
