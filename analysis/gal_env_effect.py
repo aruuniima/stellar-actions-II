@@ -6,19 +6,44 @@ This script calculates the absolute and relative changes in orbital actions (J_R
 for pairs of stars born within given spatial (birth) separation bins, separated by >30 pc
 after 100 Myr, and within the same 1 kpc Galactic radial bin.
 
-It saves the median ΔJ values over time (Δt = 1–456 Myr) into an HDF5 file, with
-datasets per radial bin. The results can be used to generate Figures 4 from the paper.
+It saves the median action difference relative and absolute change values over time (Δt = 1–456 Myr) into an HDF5 file, with datasets per radial bin. The results can be used to generate Figures 4 from the paper.
 
-paths to be changed marked with comment #CHANGE PATH HERE
+paths to be changed marked with comment #CHANGE PATH HERE and are in the USER CONFIGURATION BLOCK
 
 Author: Arunima
 Date: 13-11-2025
 Data source: https://www.mso.anu.edu.au/~arunima/stellar-actions-I-data/
 """
+# ======================================================================
+# USER CONFIGURATION - edit these/ CHANGE PATH HERE
+# ======================================================================
 
-# -----------------------------------------------------------------------------
+which_j = 1 # Select which action to analyze: 0=J_R, 1=J_PHI, 2=J_z
+
+output_dir = "/PATH/TO_SAVE/"              # CHANGE PATH HERE
+log_dir    = "/PATH/TO_SAVE/logs/"         # CHANGE PATH HERE
+action_file = "stellar-actions-I/data/actions.h5"  # CHANGE PATH HERE if needed
+#GET DATA FROM  https://www.mso.anu.edu.au/~arunima/stellar-actions-I-data/
+
+# --- Output HDF5 file ---
+output_file = output_dir + "gal_env_Jphi_allbins.h5"  # auto-selected name
+
+birth_bins = np.array((0.15,0.5,2,5,10,50,100,200))
+# --- Window for identifying co-born pairs ---
+birth_window = 1 #Myr
+delta_t_range = np.arange(1, 457, 1)
+n_bins = len(birth_bins)-1
+#birth bin 1 - 0.1-0.5 pc i=0
+#2- 2-5 pc i=2
+#3- 10-50 pc i=4
+#4 - 100-200 pc i=6
+# ======================================================================
+# END USER CONFIGURATION
+# ======================================================================
+
+# ======================================================================
 # Imports
-# -----------------------------------------------------------------------------
+# ======================================================================
 import numpy as np
 from tqdm import tqdm
 import h5py
@@ -27,9 +52,15 @@ from scipy.spatial.distance import pdist, squareform
 import pickle
 import os
 
-#-------------------------------------------------------------------------------
+# ======================================================================
+# Ensure output directories exist
+# ======================================================================
+os.makedirs(output_dir, exist_ok=True)
+os.makedirs(log_dir, exist_ok=True)
+
+# ======================================================================
  # Helper Functions
-# -----------------------------------------------------------------------------
+# ======================================================================
 def convert_to_cartesian(phi_R_z):
     """
     Convert (phi, R, z) to Cartesian coordinates (x, y, z).
@@ -49,31 +80,15 @@ def convert_to_cartesian(phi_R_z):
     
     return np.column_stack((x, y, z))
 
-#==================================================================================
-##CHANGE PATH HERE
-which_j = 1 # Select which action to analyze: 0=J_R, 1=J_PHI, 2=J_z
-output_file = "/PATH/TO_SAVE/gal_env_Jphi_allbins.h5"
 
 
-# -----------------------------------------------------------------------------
-# Configuration
-birth_bins = np.array((0.15,0.5,2,5,10,50,100,200))
-birth_window = 1 #Myr
-delta_t_range = np.arange(1, 457, 1)
-n_bins = len(birth_bins)-1
-#birth bin 1 - 0.1-0.5 pc i=0
-#2- 2-5 pc i=2
-#3- 10-50 pc i=4
-#4 - 100-200 pc i=6
-
-
-# -----------------------------------------------------------------------------
+# ======================================================================
 # Load data
-# -----------------------------------------------------------------------------    
+# ======================================================================
+
 print('loading data')
-#GET DATA FROM  https://www.mso.anu.edu.au/~arunima/stellar-actions-I-data/
-#CHANGE PATH HERE if needed
-with h5py.File('stellar-actions-I/data/actions.h5', 'r') as f:
+
+with h5py.File(action_file, 'r') as f:
     J = f['actions'][:] #filtered data saved as JR,Jz,Jphi
     C = f['coordinates'][:] #in cylindrical coordinates
     A = f['age'][:]    #STELLAR AGES (MYR)
@@ -117,8 +132,7 @@ for t in tqdm(np.arange(A.shape[0]), desc="Looping over time snapshots"):
 # Main computation loop
 # -----------------------------------------------------------------------------
 for l_R in tqdm(np.arange(2, 19, 1), desc="Processing radial bins"):
-    #CHANGE PATH HERE
-    logfile = f"/PATH/TO_SAVE/completed_timesteps_{j_label}_{l_R}.txt"    
+    logfile = f"{log_dir}/completed_{j_label}_Rbin{l_R}.txt"
     J_all = filt_J[:,IDs_in_bins[l_R]]
     A_all = A[:, IDs_in_bins[l_R]]
     C_all = C[:,IDs_in_bins[l_R]]
