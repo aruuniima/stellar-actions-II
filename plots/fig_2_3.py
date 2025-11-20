@@ -9,9 +9,31 @@ Data required:
   - HDF5 output files from action_clustering.py for JR, Jz, Jphi
   - Single-star reference .npz files (upload here or stellar-actions-I repo on github)
 
+CHANGE PATH HERE (IN USER CONFIGURATION BLOCK)
 Author: Arunima
 Date: 13-11-2025
 """
+
+# ======================================================================
+# USER CONFIGURATION (EDIT THESE ONLY)
+# ======================================================================
+# change these paths. You can get these outputs from stellar-actions-II/analysis/action_clustering.py
+output_file_R = 'path_here/JR.h5'
+output_file_z = 'path_here/Jz.h5'
+output_file_phi = 'path_here/Jphi.h5'
+
+# Reference data for single star - get from stellar-actions-I/data/
+abs_JR = np.load('path_here/abs_JR.npz')
+abs_Jz = np.load('path_here/abs_Jz.npz')
+abs_Jphi = np.load('path_here/abs_Jphi.npz')
+rel_JR = np.load('path_here/rel_JR.npz')
+rel_Jz = np.load('path_here/rel_Jz.npz')
+rel_Jphi = np.load('path_here/rel_Jphi.npz')
+
+save_dir = 'figures/'  # directory to save figures
+# ======================================================================
+# END USER CONFIGURATION 
+# ======================================================================
 
 #imports-----------------------------------------------------------------------------
 import numpy as np
@@ -30,22 +52,6 @@ plt.rcParams.update({
     'figure.titlesize': 12,
 })
 
-# -----------------------------------------------------------------------------
-# User paths (EDIT THESE)
-# -----------------------------------------------------------------------------
-output_file_R = 'results/JR.h5'
-output_file_z = 'results/Jz.h5'
-output_file_phi = 'results/Jphi.h5'
-
-# Reference data 
-abs_JR = np.load('data/abs_JR.npz')
-abs_Jz = np.load('data/abs_Jz.npz')
-abs_Jphi = np.load('data/abs_Jphi.npz')
-rel_JR = np.load('data/rel_JR.npz')
-rel_Jz = np.load('data/rel_Jz.npz')
-rel_Jphi = np.load('data/rel_Jphi.npz')
-
-save_dir = 'figures/'  # directory to save figures
 
 #-------------------------------------------------------------------------------------
 birth_bins = np.array((0.15,0.5,2,5,10,50,100,200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,5000))
@@ -114,7 +120,6 @@ axs[0].set_ylim((-1,20))
 axs[1].set_ylim((-0.05,1))
 
 plt.tight_layout()
-##### CHANGE PATH HERE
 plt.savefig(f"{save_dir}/fig2_abs_dJ.pdf", bbox_inches='tight')
 print(f"Saved Figure 2 to {save_dir}/fig2_abs_dJ.pdf")
 
@@ -148,6 +153,5 @@ axs[0].set_xlim((-5,450))
 
 
 plt.tight_layout()
-##### CHANGE PATH HERE
 plt.savefig(f"{save_dir}/fig3_rel_dJ.pdf", bbox_inches='tight')
 print(f"Saved Figure 3 to {save_dir}/fig3_rel_dJ.pdf")
