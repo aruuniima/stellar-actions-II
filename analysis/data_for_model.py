@@ -8,8 +8,9 @@ change paths etc in the user configuration block!
 Author: Arunima
 Date:19-11-2025
 """
-###### user configuration block:     EDIT HERE!! #############################################################
-#===================================================================================
+# ======================================================================
+# USER CONFIGURATION (EDIT THESE ONLY)
+# ======================================================================
 # which action component, 0 is radial, 1 is azimuthal and 2 is vertical action
 which_j = 0
 # CHANGE PATH HERE
