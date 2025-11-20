@@ -12,19 +12,9 @@ Author: Arunima
 Date: 14-11-2025
 """
 
-#-----------------------------------------------------------------------------------------------------------------------
-#IMPORTS
-#-----------------------------------------------------------------------------------------------------------------------
-
-import os 
-import h5py
-import numpy as np
-import pandas as pd
-import obs_functions as func
-
- # =============================================================================
-# Configuration
-# =============================================================================
+# ======================================================================
+# USER CONFIGURATION (EDIT THESE ONLY)
+# ======================================================================
 
 all_actions=True #are we saving the entire distribution of actions (along with age mu and sigma) to a hdf5 file
 #False would just save summary percentiles
@@ -36,6 +26,17 @@ stream_h5_file = 'PATH_HERE/streams_actions.hdf5'
 clusters_file = 'stellar-actions-II/data/clusters' # CHANGE PATH HERE
 
 mem_file =  'stellar-actions-II/data//all_stars.csv' # CHANGE PATH HERE
+
+#-----------------------------------------------------------------------------------------------------------------------
+#IMPORTS
+#-----------------------------------------------------------------------------------------------------------------------
+
+import os 
+import h5py
+import numpy as np
+import pandas as pd
+import obs_functions as func
+
 
 # =============================================================================
 # HDF5 Writing Utility
