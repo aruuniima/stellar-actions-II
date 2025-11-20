@@ -6,11 +6,31 @@ This script assumes you have already generated the HDF5 files
 `gal_env_JR_allbins.h5`, `gal_env_Jz_allbins.h5`, and `gal_env_Jphi_allbins.h5`
 using the script stellar-actions-II/analysis/gal_env_effect.py
 
-Might need to change paths, marked by the comment #CHANGE PATH HERE in the following code.
-
+CHANGE PATH HERE (IN USER CONFIGURATION BLOCK)
 Author: Arunima 
 Date: 13-11-2025
 """
+# ======================================================================
+# USER CONFIGURATION (EDIT THESE ONLY)
+# ======================================================================
+
+# change these paths. You can get these outputs from stellar-actions-II/analysis/gal_env_effect.py
+output_file_R   = "path_here/gal_env_JR_allbins.h5"
+output_file_z   = "path_here/gal_env_Jz_allbins.h5"
+output_file_phi = "path_here/gal_env_Jphi_allbins.h5"
+
+# change these paths. You can get these outputs from stellar-actions-II/analysis/action_clustering.py
+all_bins_R = 'path_here/JR.h5'
+all_bins_z = 'path_here/Jz.h5'
+all_bins_phi = 'path_here/Jphi.h5'
+
+save_dir = 'figures/'  # directory to save figures
+
+
+# ======================================================================
+# END USER CONFIGURATION 
+# ======================================================================
+
 
 # ======================================================================
 # Imports
@@ -32,12 +52,6 @@ plt.rcParams.update({
     'figure.titlesize': 12,
 })
 
-#=============================================================================
-#file paths #CHANGE PATH HERE
-
-output_file_R   = "stellar-actions-II/data/gal_env_JR_allbins.h5"
-output_file_z   = "stellar-actions-II/data/gal_env_Jz_allbins.h5"
-output_file_phi = "stellar-actions-II/data/gal_env_Jphi_allbins.h5"
 
 
 # ======================================================================
@@ -51,6 +65,12 @@ def read_relchange_by_bin(filename, dataset="birth_bin_relchange_gt30pc"):
             data.append(np.array(f[key][dataset]))
     return np.array(data)
 
+def load_results(filepath):
+    """Load absolute and relative ΔJ datasets from an HDF5 file."""
+    with h5py.File(filepath, "r") as f:
+        abs_data = f["birth_bin_abschange_gt30pc"][:]
+        rel_data = f["birth_bin_relchange_gt30pc"][:]
+    return abs_data, rel_data
 
 # ======================================================================
 # Load data
@@ -60,6 +80,10 @@ list_JR   = read_relchange_by_bin(output_file_R)
 list_Jz   = read_relchange_by_bin(output_file_z)
 list_Jphi = read_relchange_by_bin(output_file_phi)
 
+#for data from all galaxy 
+JR_abs_30, JR_rel_30 = load_results(all_bins_R)
+Jz_abs_30, Jz_rel_30 = load_results(all_bins_z)
+Jphi_abs_30, Jphi_rel_30 = load_results(all_bins_phi)
 
 # ======================================================================
 # Plotting
@@ -98,6 +122,5 @@ axs[0].legend(ncols=2)
 axs[2].set_xlabel(r"$\Delta t$ (Myr)")
 axs[0].set_xlim((-5,450))
 plt.tight_layout()
-#CHANGE PATH HERE
-plt.savefig("stellar-actions-II/plots/fig4_radial_dependence.pdf")
+plt.savefig(f"{save_dir}/fig4_radial_dependence.pdf")
 plt.show()
