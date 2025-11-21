@@ -1,5 +1,5 @@
 """
-Plot Figure 8 (or A1), 9, 10 and 12 from Arunima et al paper II
+Plot Figure 8 (or A1), 9, 10, 12 and 13 from Arunima et al paper II
 ------------------------------------------------
 
 This script visualizes:
@@ -7,15 +7,15 @@ This script visualizes:
 - the distribution of the L1 norm which measures the quality of our fit (Fig 9).
 - the cumulative distribution of inferred logaithmic initial sizes (different percentiles, Fig 10)
 - Distribution of inferred logarithmic median intitial size as a function of median age of the streams (Fig 12).
+- Distribution of the completeness fraction of the streams
 
-
-Assumes you have d_init.csv file containing summary statistics per stream (from analysis/run_stream_analysis.py).
+Assumes you have d_init.csv file containing summary statistics per stream (from analysis/run_stream_analysis.py) and completeness fraction of the streams from f_comp.py.
 OR you can use stellar-actions-II/data/Table_1.csv file
 This script is written assuming you are using Table_1.csv. If using the result from run_stream_analysis.py directly, you will have to change the fieldnames as follows (and all sizes are in logarithm in the result so need to change that):
 
 fieldnames = ["cluster_name", "med_r_init", "high_1s", "high_2s",'l1','med_r_init_bias','1s_bias','2s_bias','l1_bias']
 
-Here we have used ['Cluster Name', 'd_init50', 'd_init84', 'd_init97', 'L1_f', 'd_trunc50', 'd_trunc84', 'd_trunc97', 'L1_ftrunc'].
+Here we have used ['Cluster Name', 'd_init50', 'd_init84', 'd_init97', 'L1_f', 'd_trunc50', 'd_trunc84', 'd_trunc97', 'L1_ftrunc','f_comp'].
 Plus you will have to add the age from the all_stars.csv file.
 
 
@@ -68,6 +68,7 @@ l1_bias = d_init['L1_ftrunc'].to_numpy()
 
 age = d_init['Median age'].to_numpy()
 
+f_comp = d_init['f_comp'].to_numpy()
 
 
 ############################################################################
@@ -148,3 +149,18 @@ plt.ylabel('Median Age (Myr)')
 plt.xlabel(r'$a_{50} = \log d_\text{init50}$')
 plt.tight_layout()
 plt.savefig(fig_dir+'fig12.pdf')
+
+############################################################################
+# actual plotting - Figure 13 - distribution of completeness fraction of the streams
+############################################################################
+
+plt.close('all')
+plt.figure()
+bins=np.linspace(0.4,1,20)
+plt.hist(f_comp,alpha=0.3,bins=bins,label='all streams')
+plt.hist(f_comp[mask],bins=bins,alpha=0.3,color='fuchsia',label=r'streams with $d_{\text{trunc}50}<10$ pc')
+plt.ylabel("Number of streams")
+plt.xlabel(r'$f_\text{comp}$ (completeness fraction)')
+plt.tight_layout()
+plt.legend()
+plt.savefig(fig_dir + 'fig13_completeness.pdf')
