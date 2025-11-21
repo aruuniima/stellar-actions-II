@@ -11,6 +11,13 @@ This script visualizes:
 
 Assumes you have d_init.csv file containing summary statistics per stream (from analysis/run_stream_analysis.py).
 OR you can use stellar-actions-II/data/Table_1.csv file
+This script is written assuming you are using Table_1.csv. If using the result from run_stream_analysis.py directly, you will have to change the fieldnames as follows (and all sizes are in logarithm in the result so need to change that):
+
+fieldnames = ["cluster_name", "med_r_init", "high_1s", "high_2s",'l1','med_r_init_bias','1s_bias','2s_bias','l1_bias']
+
+Here we have used ['Cluster Name', 'd_init50', 'd_init84', 'd_init97', 'L1_f', 'd_trunc50', 'd_trunc84', 'd_trunc97', 'L1_ftrunc'].
+Plus you will have to add the age from the all_stars.csv file.
+
 
 For getting figure A1, you need to use a different d_init.csv file by running the run_stream_analysis.py and compute_stream_actions.py scripts with edited mem_file (stellar-actions-II/data/all_stars.csv) wherein you remove the members with radial velocity more than 3 sigma away from the stream mean radial velocity for each stream.
 
