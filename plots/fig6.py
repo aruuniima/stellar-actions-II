@@ -35,7 +35,7 @@ from ..analysis.utils_inference import read_stream_actions, load_kde_dt
 # ======================================================================
 # helper function: evaluate conditional CDF at fixed r_init
 # ======================================================================
-def cdfP_ifr_init(r_init,interp):
+def cdfP_ifr_init(r_init,interp,dj_grid):
     A=np.cumsum(interp((np.log10(r_init),dj_grid)))
     return A/A[-1]
 
@@ -49,10 +49,10 @@ colormap = cm.get_cmap('plasma', len(range(1, 5, 1)))
 plt.close('all')
 fig, axs = plt.subplots(2, 1, figsize=(5,7),sharex='all')
 axs[0].set_ylabel(r' CDF of $ \mathcal{P}_\text{1D}(x \mid a,\tau)$')
-axs[0].plot(dj_grid,cdfP_ifr_init(r1,interp),c=colormap(0),label=f'{r1} pc')
-axs[0].plot(dj_grid,cdfP_ifr_init(r2,interp),c=colormap(1),label=f'{r2} pc')
-axs[0].plot(dj_grid,cdfP_ifr_init(r3,interp),c=colormap(2),label=f'{r3} pc')
-axs[0].plot(dj_grid,cdfP_ifr_init(r4,interp),c=colormap(3),label=f'{r4} pc')
+axs[0].plot(dj_grid,cdfP_ifr_init(r1,interp,dj_grid),c=colormap(0),label=f'{r1} pc')
+axs[0].plot(dj_grid,cdfP_ifr_init(r2,interp,dj_grid),c=colormap(1),label=f'{r2} pc')
+axs[0].plot(dj_grid,cdfP_ifr_init(r3,interp,dj_grid),c=colormap(2),label=f'{r3} pc')
+axs[0].plot(dj_grid,cdfP_ifr_init(r4,interp,dj_grid),c=colormap(3),label=f'{r4} pc')
 axs[0].plot(np.sort(np.log10(delJz_obs)),np.linspace(0,1,delJz_obs.shape[0]),label=name,c='k',linewidth=3)
 axs[0].fill_between(np.sort(np.log10(delJz_obs)),np.linspace(0,1,delJz_obs.shape[0]),color='grey',alpha=0.5)
 axs[0].legend()
@@ -63,10 +63,10 @@ r_grid, dj_grid, P_cond, interp = load_kde_dt(kde_dir, int(mu),bias=True,max_J_o
 
 axs[1].set_ylabel(r' CDF of $ \mathcal{P}_\text{1D}(x \mid a,\tau)$')
 axs[1].set_xlabel(r"$x = \log\,\delta_{\rm rel}\Delta J_z$")
-axs[1].plot(dj_grid,cdfP_ifr_init(r1,interp),c=colormap(0),label=f'{r1} pc')
-axs[1].plot(dj_grid,cdfP_ifr_init(r2,interp),c=colormap(1),label=f'{r2} pc')
-axs[1].plot(dj_grid,cdfP_ifr_init(r3,interp),c=colormap(2),label=f'{r3} pc')
-axs[1].plot(dj_grid,cdfP_ifr_init(r4,interp),c=colormap(3),label=f'{r4} pc')
+axs[1].plot(dj_grid,cdfP_ifr_init(r1,interp,dj_grid),c=colormap(0),label=f'{r1} pc')
+axs[1].plot(dj_grid,cdfP_ifr_init(r2,interp,dj_grid),c=colormap(1),label=f'{r2} pc')
+axs[1].plot(dj_grid,cdfP_ifr_init(r3,interp,dj_grid),c=colormap(2),label=f'{r3} pc')
+axs[1].plot(dj_grid,cdfP_ifr_init(r4,interp,dj_grid),c=colormap(3),label=f'{r4} pc')
 
 axs[1].plot(np.sort(np.log10(delJz_obs)),np.linspace(0,1,delJz_obs.shape[0]),label=name,c='k',linewidth=3)
 axs[1].fill_between(np.sort(np.log10(delJz_obs)),np.linspace(0,1,delJz_obs.shape[0]),color='grey',alpha=0.5)
