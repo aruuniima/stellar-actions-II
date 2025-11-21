@@ -9,7 +9,7 @@ Arunima et al. (submitted)
 The repository is organised into several top-level directories, each corresponding to a major component of the project workflow. Every directory includes its own `README` with detailed descriptions of the scripts and their roles. 
 
 The workflows in this repository are designed to be modular:  
-- **`analysis/`** - Core analysis scripts. Computes action differences, clustering statistics, stream evolution measures. Contains helper utilities.
+- **`analysis/`** - Core analysis scripts. Computes action differences, clustering statistics, stream inference model, observed actions' distriutions. Contains helper utilities.
 - **`data/`** -  Contains raw and processed data required for the analysis. (Some files excluded due to size.)
 - **`plots/`** contains clean, lightweight scripts that reproduce the final paper figures.  
 
