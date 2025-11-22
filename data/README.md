@@ -57,6 +57,22 @@ Used in:
 Field names match those required by the script.
 
 ---
+### `final_clusters_result.csv`
+Result of the script `compute_stream_actions.py` with `all_actions=False`.
+
+Contains:
+- Cluster names
+- 16, 50 and 84th percentiles of radial, vertical and azimuthal action differences
+- 16, 50 and 84th percentiles of age of the cluster/stream
+- Total number of stream members
+- Number of stream members with radial velocities available
+- Present radius
+  
+
+Used in:
+- `fig5.py` script
+
+---
 
 ## 2. External Simulation Data (Not Included Here)
 
