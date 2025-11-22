@@ -21,8 +21,10 @@ all_actions=True #are we saving the entire distribution of actions (along with a
 
 #define a function to write out the hdf5 file if all_actions==True:
 # CHANGE PATH HERE
-stream_h5_file = 'PATH_HERE/streams_actions.hdf5'
-
+if all_actions==True:
+    stream_h5_file = 'PATH_HERE/streams_actions.hdf5'
+if all_actions==False:
+    csv_file = 'PATH_HERE/final_clusters_result.csv'
 clusters_file = 'stellar-actions-II/data/clusters' # CHANGE PATH HERE
 
 mem_file =  'stellar-actions-II/data//all_stars.csv' # CHANGE PATH HERE
@@ -153,4 +155,4 @@ if all_actions==False:
     
     summary_df = pd.DataFrame(all_clusters_summary, columns=columns)
     # CHANGE PATH HERE
-    summary_df.to_csv('PATH_HERE/final_clusters_result.csv',index=False)
+    summary_df.to_csv(csv_file,index=False)
