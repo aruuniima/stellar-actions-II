@@ -14,3 +14,5 @@ The workflows in this repository are designed to be modular:
 - **`plots/`** contains clean, lightweight scripts that reproduce the final paper figures.  
 
 Please refer to the individual directory READMEs for specifics on running the scripts, input formats, and expected outputs.
+
+The project requires Python 3.12.1 and several scientific libraries listed in `requirements.txt`.
