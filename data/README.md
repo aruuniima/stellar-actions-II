@@ -83,6 +83,8 @@ Each of these scripts contains a `USER CONFIGURATION` block where you can set:
 
 For more details, see the README in the `analysis/` directory.
 
+There are also some files in stellar-actions-I(/data) repository that are needed for the plotting script `fig_2_3.py`.
+
 ---
 
 ## 3. Summary of Required Inputs per Script
